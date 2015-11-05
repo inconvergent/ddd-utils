@@ -1,6 +1,40 @@
 # -*- coding: utf-8 -*-
 
-def load(
+def load(fn):
+
+  from codecs import open
+  from numpy import row_stack
+
+  vertices = []
+  faces = []
+
+  with open(fn, 'r', encoding='utf8') as f:
+
+    for l in f:
+      if l.startswith('#'):
+        continue
+
+      values = l.split()
+      if not values:
+        continue
+      if values[0] == 'v':
+        vertices.append([float(v) for v in values[1:]])
+
+      if values[0] == 'f':
+        face = [int(v.split('//')[0])-1 for v in values[1:]]
+        faces.append(face)
+
+  try:
+    faces = row_stack(faces)
+  except ValueError:
+    faces = None
+
+  return {
+    'faces': faces,
+    'vertices': row_stack(vertices)
+  }
+
+def load_to_centre(
   fn,
   sx=[1.0,1.0,1.0],
   mx=[0,5,0.5,0.5]
@@ -75,12 +109,16 @@ def load(
     'vertices': np_vertices
   }
 
-def export(np_verts, np_tris, obj_name, fn, meta=False):
+def export(obj_name, fn, verts, tris=None, meta=False):
 
   from codecs import open
 
-  vnum = len(np_verts)
-  fnum = len(np_tris)
+  vnum = len(verts)
+
+  if tris is not None:
+    fnum = len(tris)
+  else:
+    fnum = 0
 
   print('storing mesh ...')
   print('num vertices: {:d}, num triangles: {:d}'.format(vnum, fnum))
@@ -98,14 +136,15 @@ def export(np_verts, np_tris, obj_name, fn, meta=False):
 
     f.write('o {:s}\n'.format(obj_name))
 
-    for v in np_verts[:vnum,:]:
+    for v in verts:
       f.write('v {:f} {:f} {:f}\n'.format(*v))
 
     f.write('s off\n')
 
-    for t in np_tris[:fnum,:]:
-      t += 1
-      f.write('f {:d} {:d} {:d}\n'.format(*t))
+    if tris is not None:
+      for t in tris:
+        t += 1
+        f.write('f {:d} {:d} {:d}\n'.format(*t))
 
     print('done.')
 
