@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+here=$(pwd)
+
+rm -rf build
+rm -rf dist
+rm -rf *.egg-info
+
+./setup.py install --user
+
