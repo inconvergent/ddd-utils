@@ -34,42 +34,23 @@ def load(fn):
     'vertices': row_stack(vertices)
   }
 
-def load_to_centre(
+def load_move_scale(
   fn,
-  sx=[1.0,1.0,1.0],
-  mx=[0,5,0.5,0.5]
+  s=1,
+  mx=[0,0,0]
 ):
 
-  from codecs import open
-  from numpy import row_stack
+  data = load(fn)
 
-  vertices = []
-  faces = []
+  vertices = data['vertices']
+  faces = data['faces']
 
-  with open(fn, 'r', encoding='utf8') as f:
-
-    for l in f:
-      if l.startswith('#'):
-        continue
-
-      values = l.split()
-      if not values:
-        continue
-      if values[0] == 'v':
-        vertices.append([float(v) for v in values[1:]])
-
-      if values[0] == 'f':
-        face = [int(v.split('//')[0])-1 for v in values[1:]]
-        faces.append(face)
-
-  np_vertices = row_stack(vertices)
-
-  xmax = np_vertices[:,0].max()
-  xmin = np_vertices[:,0].min()
-  ymax = np_vertices[:,1].max()
-  ymin = np_vertices[:,1].min()
-  zmax = np_vertices[:,2].max()
-  zmin = np_vertices[:,2].min()
+  xmax = vertices[:,0].max()
+  xmin = vertices[:,0].min()
+  ymax = vertices[:,1].max()
+  ymin = vertices[:,1].min()
+  zmax = vertices[:,2].max()
+  zmin = vertices[:,2].min()
   dx = xmax - xmin
   dy = ymax - ymin
   dz = zmax - zmin
@@ -79,22 +60,22 @@ def load_to_centre(
   print('y min max, {:0.8f} {:0.8f}, dst: {:0.8f}'.format(ymin,ymax,dy))
   print('z min max, {:0.8f} {:0.8f}, dst: {:0.8f}'.format(zmin,zmax,dz))
 
-  np_vertices /= max([dx,dy,dz])
+  vertices /= max([dx,dy,dz])
 
-  np_vertices[:,0] *= sx[0]
-  np_vertices[:,1] *= sx[1]
-  np_vertices[:,2] *= sx[2]
+  vertices[:,0] *= s
+  vertices[:,1] *= s
+  vertices[:,2] *= s
 
-  np_vertices[:,0] += mx[0]
-  np_vertices[:,1] += mx[1]
-  np_vertices[:,2] += mx[2]
+  vertices[:,0] += mx[0]
+  vertices[:,1] += mx[1]
+  vertices[:,2] += mx[2]
 
-  xmax = np_vertices[:,0].max()
-  xmin = np_vertices[:,0].min()
-  ymax = np_vertices[:,1].max()
-  ymin = np_vertices[:,1].min()
-  zmax = np_vertices[:,2].max()
-  zmin = np_vertices[:,2].min()
+  xmax = vertices[:,0].max()
+  xmin = vertices[:,0].min()
+  ymax = vertices[:,1].max()
+  ymin = vertices[:,1].min()
+  zmax = vertices[:,2].max()
+  zmin = vertices[:,2].min()
   dx = xmax - xmin
   dy = ymax - ymin
   dz = zmax - zmin
@@ -105,8 +86,8 @@ def load_to_centre(
   print('z min max, {:0.8f} {:0.8f}, dst: {:0.8f}'.format(zmin,zmax,dz))
 
   return {
-    'faces': row_stack(faces),
-    'vertices': np_vertices
+    'faces': faces,
+    'vertices': vertices
   }
 
 def export(obj_name, fn, verts, tris=None, meta=False):
