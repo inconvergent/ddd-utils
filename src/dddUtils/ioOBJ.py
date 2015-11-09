@@ -34,6 +34,40 @@ def load(fn):
     'vertices': row_stack(vertices)
   }
 
+def load_2d(fn):
+
+  from codecs import open
+  from numpy import row_stack
+
+  vertices = []
+  edges = []
+
+  with open(fn, 'r', encoding='utf8') as f:
+
+    for l in f:
+      if l.startswith('#'):
+        continue
+
+      values = l.split()
+      if not values:
+        continue
+      if values[0] == 'v':
+        vertices.append([float(v) for v in values[1:]])
+
+      if values[0] == 'e':
+        edge = [int(v.split('//')[0])-1 for v in values[1:]]
+        edges.append(edge)
+
+  try:
+    edges = row_stack(edges)
+  except ValueError:
+    edges = None
+
+  return {
+    'edges': edges,
+    'vertices': row_stack(vertices)
+  }
+
 def load_move_scale(
   fn,
   s=1,
@@ -128,4 +162,44 @@ def export(obj_name, fn, verts, tris=None, meta=False):
         f.write('f {:d} {:d} {:d}\n'.format(*t))
 
     print('done.')
+
+def export_2d(obj_name, fn, verts, edges=None, meta=False):
+
+  from codecs import open
+
+  vnum = len(verts)
+
+  if edges is not None:
+    enum = len(edges)
+  else:
+    enum = 0
+
+  print('storing mesh ...')
+  print('num vertices: {:d}, num edges: {:d}'.format(vnum, enum))
+
+  with open(fn, 'wb', encoding='utf8') as f:
+
+    if meta:
+      f.write('# meta:\n')
+      f.write(meta+'\n')
+
+    f.write('# info:\n')
+
+    f.write('# vnum: {:d}\n# fnum: {:d}\n\n\n'
+      .format(vnum, enum))
+
+    f.write('o {:s}\n'.format(obj_name))
+
+    for v in verts:
+      f.write('v {:f} {:f}\n'.format(*v))
+
+    f.write('s off\n')
+
+    if edges is not None:
+      for t in edges:
+        t += 1
+        f.write('e {:d} {:d}\n'.format(*t))
+
+    print('done.')
+
 

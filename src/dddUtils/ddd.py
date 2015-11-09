@@ -6,9 +6,21 @@ def get_mid_2d(v):
 
   mi = v.min(axis=0).squeeze()
   ma = v.max(axis=0).squeeze()
-  midx = (mi[0]+ma[0])*0.5
-  midy = (mi[1]+ma[1])*0.5
-  move = array([[midx,midy]])
+  midx = mi[0]+ma[0]
+  midy = mi[1]+ma[1]
+  move = array([[midx,midy]])*0.5
+  return move
+
+def get_mid_3d(v):
+
+  from numpy import array
+
+  mi = v.min(axis=0).squeeze()
+  ma = v.max(axis=0).squeeze()
+  midx = mi[0]+ma[0]
+  midy = mi[1]+ma[1]
+  midz = mi[2]+ma[2]
+  move = array([[midx,midy,midz]])*0.5
   return move
 
 def random_unit_vec(num, scale):
