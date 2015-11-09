@@ -1,0 +1,4 @@
+#!/bin/bash
+
+blender="/usr/bin/blender"
+

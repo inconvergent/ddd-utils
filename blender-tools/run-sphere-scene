@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+source ./settings
+here=$(pwd)
+scene="$1"
+name="$2"
+blendout="$3"
+scale="$4"
+
+run_script="$here/make_sphere_scene.py"
+
+if [ "$#" -le 2 ]; then
+  echo "Usage: $0 scene obj blendout [scale]" >&2
+    exit 1
+fi
+
+"$blender"  "$scene" -b -P "$run_script" -- "$name" "$blendout" "$scale"
+
