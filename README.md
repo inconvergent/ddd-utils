@@ -22,11 +22,12 @@ Blender.
 The remaining code should hopefully be compatible with both Python2 and Python3,
 so it can be installed and imported in either environment.
 
-I haven't really tested this much yet!
-
 ## Used in
 
 *    https://github.com/inconvergent/differential-cloud
+*    https://github.com/inconvergent/differential-mesh-3d
+*    https://github.com/inconvergent/differential-line-mpi
+
 
 
 -----------
