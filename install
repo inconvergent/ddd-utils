@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+
+./install-python2
+./install-python3

@@ -163,7 +163,7 @@ def export(obj_name, fn, verts, tris=None, meta=False):
 
     print('done.')
 
-def export_2d(obj_name, fn, verts, edges=None, meta=False):
+def export_2d(obj_name, fn, verts, edges = None, faces = None, meta = False):
 
   from codecs import open
 
@@ -199,6 +199,12 @@ def export_2d(obj_name, fn, verts, edges=None, meta=False):
       for t in edges:
         t += 1
         f.write('e {:d} {:d}\n'.format(*t))
+
+    if faces is not None:
+      for fa in faces:
+        fa += 1
+        f.write('f {:d} {:d} {:d}\n'.format(*fa))
+
 
     print('done.')
 
