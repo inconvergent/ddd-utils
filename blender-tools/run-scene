@@ -8,7 +8,7 @@ obj="$2"
 out="$3"
 run_script="$here/make_scene.py"
 
-if [ "$#" -le 1 ]; then
+if [ "$#" -le 2 ]; then
   echo "Usage: $0 scene obj out" >&2
     exit 1
 fi
