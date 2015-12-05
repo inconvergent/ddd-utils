@@ -2,7 +2,7 @@
 
 def load(fn):
 
-  from codecs import open
+  from codecs import open_2d
   from numpy import row_stack
 
   vertices = []
@@ -41,6 +41,7 @@ def load_2d(fn):
 
   vertices = []
   edges = []
+  faces = []
 
   with open(fn, 'r', encoding='utf8') as f:
 
@@ -58,14 +59,29 @@ def load_2d(fn):
         edge = [int(v.split('//')[0])-1 for v in values[1:]]
         edges.append(edge)
 
+      if values[0] == 'f':
+        face = [int(v.split('//')[0])-1 for v in values[1:]]
+        faces.append(face)
+
   try:
     edges = row_stack(edges)
   except ValueError:
     edges = None
 
+  try:
+    faces = row_stack(faces)
+  except ValueError:
+    faces = None
+
+  try:
+    vertices = row_stack(vertices)
+  except ValueError:
+    vertices = None
+
   return {
     'edges': edges,
-    'vertices': row_stack(vertices)
+    'faces': faces,
+    'vertices': vertices
   }
 
 def load_move_scale(
