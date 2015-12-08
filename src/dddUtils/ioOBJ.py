@@ -2,7 +2,7 @@
 
 def load(fn):
 
-  from codecs import open_2d
+  from codecs import open
   from numpy import row_stack
 
   vertices = []
