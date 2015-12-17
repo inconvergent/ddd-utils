@@ -17,12 +17,33 @@ def get_mid(v):
 
 def make_triangles(c, vertices, faces, edges):
 
-  for fff in faces:
-    c.move_to(*vertices[fff[0]])
-    c.line_to(*vertices[fff[1]])
-    c.line_to(*vertices[fff[2]])
-    c.close_path()
-    c.stroke()
+  hit_edges = set()
+  hits = 0
+  edges = 0
+
+  for v1,v2,v3 in faces:
+
+    for e in [
+        tuple(sorted([v1,v2])), 
+        tuple(sorted([v2,v3])), 
+        tuple(sorted([v3,v1]))
+    ]:
+
+      if e not in hit_edges:
+
+        c.move_to(*vertices[e[0]])
+        c.line_to(*vertices[e[1]])
+        # c.close_path()
+        c.stroke()
+
+        hit_edges.add(e)
+        edges += 1
+
+      else:
+        hits += 1
+
+  print('edges', edges)
+  print('hits', hits)
 
   return
 
@@ -126,8 +147,8 @@ def main(args, **argv):
   vertices += array([[0.5,0.5]])
   vertices *= size
 
-  # make_triangles(c, vertices, faces, edges)
-  make_random_length_strips(c, vertices, faces, edges)
+  make_triangles(c, vertices, faces, edges)
+  # make_random_length_strips(c, vertices, faces, edges)
 
   c.save()
 
