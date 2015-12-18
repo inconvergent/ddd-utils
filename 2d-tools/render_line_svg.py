@@ -3,6 +3,75 @@
 
 BLACK = [0,0,0,1]
 
+def order_edges(edges):
+  res = []
+  ev_dict = {}
+  ve_dict = {}
+  e_visited = {}
+  v_ordered = []
+  e_ordered = []
+  enum = len(edges)
+
+  for e,(v1,v2) in enumerate(edges):
+
+    ev_dict[e] = [v1,v2]
+
+    if v1 in ve_dict:
+      ve_dict[v1].append(e)
+    else:
+      ve_dict[v1] = [e]
+
+    if v2 in ve_dict:
+      ve_dict[v2].append(e)
+    else:
+      ve_dict[v2] = [e]
+
+  e_start = 0
+  for v,ee in ve_dict.iteritems():
+    if len(ee)<2:
+      e_start = ee[0]
+      break
+
+  e_visited[e_start] = True
+
+  vcurr = ev_dict[e_start][1]
+  vend = ev_dict[e_start][0]
+
+  v_ordered.append(vend)
+  v_ordered.append(vcurr)
+  e_ordered.append(e_start)
+
+  while vend!=vcurr:
+
+    try:
+
+      if ve_dict[vcurr][0] in e_visited:
+        e = ve_dict[vcurr][1]
+      else:
+        e = ve_dict[vcurr][0]
+
+      e_visited[e] = True
+      e_ordered.append(e)
+
+      v1,v2 = ev_dict[e]
+
+      if v1 == vcurr:
+        vcurr = v2
+      else:
+        vcurr = v1
+
+      v_ordered.append(vcurr)
+
+    except Exception:
+      break
+
+  # print(ve_dict)
+  # print(ev_dict)
+  # print(v_ordered)
+  # print(e_ordered)
+
+  return e_ordered, v_ordered
+
 
 def make_line(c, vertices, edges, n=10):
 
@@ -11,7 +80,9 @@ def make_line(c, vertices, edges, n=10):
   from numpy.random import random
   from numpy import roll
 
-  xys = vertices[edges]
+  e_ordered,_ = order_edges(edges)
+
+  xys = vertices[edges[e_ordered]]
 
   ii = arange(n)/float(n)
 
