@@ -9,7 +9,7 @@ def order_edges(edges):
   ve_dict = {}
   e_visited = {}
   v_ordered = []
-  e_ordered = []
+  e_order = []
   enum = len(edges)
 
   for e,(v1,v2) in enumerate(edges):
@@ -39,7 +39,7 @@ def order_edges(edges):
 
   v_ordered.append(vend)
   v_ordered.append(vcurr)
-  e_ordered.append(e_start)
+  e_order.append(e_start)
 
   while vend!=vcurr:
 
@@ -51,7 +51,7 @@ def order_edges(edges):
         e = ve_dict[vcurr][0]
 
       e_visited[e] = True
-      e_ordered.append(e)
+      e_order.append(e)
 
       v1,v2 = ev_dict[e]
 
@@ -65,44 +65,37 @@ def order_edges(edges):
     except Exception:
       break
 
-  # print(ve_dict)
-  # print(ev_dict)
-  # print(v_ordered)
-  # print(e_ordered)
-
-  return e_ordered, v_ordered
+  return e_order, v_ordered
 
 
-def make_line(c, vertices, edges, n=10):
+def make_random_line(c, vertices, edges, n=10):
 
   from numpy import arange
   from numpy import array
   from numpy.random import random
   from numpy import roll
 
-  e_ordered,_ = order_edges(edges)
+  # e_order puts edges in successive order, but consecutuve edge vertices may
+  # not have correct order. 
+  # v_ordered contains the ordered vertices of the entire path.
+  e_order,v_ordered = order_edges(edges)
 
-  xys = vertices[edges[e_ordered]]
+  ## order edges, and get vertex coordinates
+  # xys = vertices[edges[e_order]]
 
-  ii = arange(n)/float(n)
+  xys = vertices[v_ordered,:]
 
   c.new_path()
+  curr = xys[0,:]
+  for xy in xys[1:,:]:
 
-  for xy in xys:
-
-    start = xy[0,:]
-    stop = xy[1,:]
-    dd = (stop-start)*random()
-
-    c.move_to(*start)
-    c.line_to(*(start+dd))
-
-    # c.move_to(*start)
-    # c.line_to(*(start+dd[::-1]*array([-1,1])))
+    dd = (xy-curr)*random()
+    c.move_to(*curr)
+    c.line_to(*(curr+dd))
+    curr = xy
   
   c.stroke()
   
-  return
 
 def main(args, **argv):
 
@@ -137,7 +130,7 @@ def main(args, **argv):
     vertices = data['vertices']
     vertices *= scale*size
     edges = data['edges']
-    make_line(c, vertices, edges)
+    make_random_line(c, vertices, edges)
 
   c.save()
 
