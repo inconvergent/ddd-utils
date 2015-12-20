@@ -73,7 +73,6 @@ def make_random_line(c, vertices, edges, n=10):
   from numpy import arange
   from numpy import array
   from numpy.random import random
-  from numpy import roll
 
   # e_order puts edges in successive order, but consecutuve edge vertices may
   # not have correct order. 
@@ -93,6 +92,29 @@ def make_random_line(c, vertices, edges, n=10):
     c.move_to(*curr)
     c.line_to(*(curr+dd))
     curr = xy
+  
+  c.stroke()
+
+def make_line(c, vertices, edges, n=10):
+
+  from numpy import arange
+  from numpy import array
+
+  # e_order puts edges in successive order, but consecutuve edge vertices may
+  # not have correct order. 
+  # v_ordered contains the ordered vertices of the entire path.
+  e_order,v_ordered = order_edges(edges)
+
+  ## order edges, and get vertex coordinates
+  # xys = vertices[edges[e_order]]
+
+  xys = vertices[v_ordered,:]
+
+  c.new_path()
+  curr = xys[0,:]
+  c.move_to(*curr)
+  for xy in xys[1:,:]:
+    c.line_to(*xy)
   
   c.stroke()
   
@@ -130,7 +152,8 @@ def main(args, **argv):
     vertices = data['vertices']
     vertices *= scale*size
     edges = data['edges']
-    make_random_line(c, vertices, edges)
+    # make_random_line(c, vertices, edges)
+    make_line(c, vertices, edges)
 
   c.save()
 
