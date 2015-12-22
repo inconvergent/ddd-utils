@@ -132,6 +132,7 @@ def main(args, **argv):
   one = 1.0/size
   steps = args.steps
   stride = args.stride
+  skip = args.skip
 
   out = prefix + '.svg'
   print('making file: {:s}'.format(out))
@@ -143,7 +144,7 @@ def main(args, **argv):
   c.set_source_rgba(*BLACK)
 
 
-  for fn in sorted(glob(prefix + '*.2obj'))[:steps:stride]:
+  for fn in sorted(glob(prefix + '*.2obj'))[skip:steps:stride]:
 
     print(fn)
 
@@ -183,6 +184,11 @@ if __name__ == '__main__':
     '--stride',
     type=int,
     default=1
+  )
+  parser.add_argument(
+    '--skip',
+    type=int,
+    default=0
   )
   parser.add_argument(
     '--scale',
