@@ -7,6 +7,7 @@ def load(fn):
 
   vertices = []
   faces = []
+  lines = []
 
   with open(fn, 'r', encoding='utf8') as f:
 
@@ -24,6 +25,10 @@ def load(fn):
         face = [int(v.split('//')[0])-1 for v in values[1:]]
         faces.append(face)
 
+      if values[0] == 'l':
+        line = [int(v.split('//')[0])-1 for v in values[1:]]
+        lines.append(line)
+
   try:
     faces = row_stack(faces)
   except ValueError:
@@ -31,7 +36,8 @@ def load(fn):
 
   return {
     'faces': faces,
-    'vertices': row_stack(vertices)
+    'vertices': row_stack(vertices),
+    'lines': lines
   }
 
 def load_2d(fn):
@@ -42,6 +48,7 @@ def load_2d(fn):
   vertices = []
   edges = []
   faces = []
+  lines = []
 
   with open(fn, 'r', encoding='utf8') as f:
 
@@ -63,6 +70,10 @@ def load_2d(fn):
         face = [int(v.split('//')[0])-1 for v in values[1:]]
         faces.append(face)
 
+      if values[0] == 'l':
+        line = [int(v.split('//')[0])-1 for v in values[1:]]
+        lines.append(line)
+
   try:
     edges = row_stack(edges)
   except ValueError:
@@ -81,7 +92,8 @@ def load_2d(fn):
   return {
     'edges': edges,
     'faces': faces,
-    'vertices': vertices
+    'vertices': vertices,
+    'lines': lines
   }
 
 def load_move_scale(
@@ -140,7 +152,7 @@ def load_move_scale(
     'vertices': vertices
   }
 
-def export(obj_name, fn, verts, tris=None, meta=False):
+def export(obj_name, fn, verts, tris=None, lines=None, meta=False):
 
   from codecs import open
 
@@ -177,9 +189,15 @@ def export(obj_name, fn, verts, tris=None, meta=False):
         t += 1
         f.write('f {:d} {:d} {:d}\n'.format(*t))
 
+    if lines is not None:
+      for line in lines:
+        line += 1
+        l = ' '.join(map(str, line))
+        f.write('l {:s}\n'.format(l))
+
     print('done.')
 
-def export_2d(obj_name, fn, verts, edges = None, faces = None, meta = False):
+def export_2d(obj_name, fn, verts, edges = None, faces = None, lines = None, meta = False):
 
   from codecs import open
 
@@ -220,6 +238,12 @@ def export_2d(obj_name, fn, verts, edges = None, faces = None, meta = False):
       for fa in faces:
         fa += 1
         f.write('f {:d} {:d} {:d}\n'.format(*fa))
+
+    if lines is not None:
+      for line in lines:
+        line += 1
+        l = ' '.join(map(str, line))
+        f.write('l {:s}\n'.format(l))
 
 
     print('done.')

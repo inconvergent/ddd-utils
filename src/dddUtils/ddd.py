@@ -95,15 +95,15 @@ def get_distinct_edges_from_tris(faces):
 
   hit_edges = set()
   edges = []
-  
+
   hn = 0
   en = 0
 
   for v1,v2,v3 in faces:
 
     for e in [
-        tuple(sorted([v1,v2])), 
-        tuple(sorted([v2,v3])), 
+        tuple(sorted([v1,v2])),
+        tuple(sorted([v2,v3])),
         tuple(sorted([v3,v1]))
     ]:
 
