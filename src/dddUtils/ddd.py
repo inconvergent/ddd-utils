@@ -179,6 +179,36 @@ def order_edges(edges):
 
   return e_order, v_ordered
 
+def get_distinct_edges_from_tris(faces):
+
+  hit_edges = set()
+  edges = []
+  
+  hn = 0
+  en = 0
+
+  for v1,v2,v3 in faces:
+
+    for e in [
+        tuple(sorted([v1,v2])), 
+        tuple(sorted([v2,v3])), 
+        tuple(sorted([v3,v1]))
+    ]:
+
+      if e not in hit_edges:
+
+        edges.append(e)
+        hit_edges.add(e)
+        en += 1
+
+      else:
+        hn += 1
+
+  print('final edges', en)
+  print('duplicates ignored', hn)
+
+  return edges
+
 def spatial_sort(paths, init_rad=0.01):
 
   from numpy import row_stack
