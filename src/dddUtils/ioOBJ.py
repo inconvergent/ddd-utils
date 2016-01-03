@@ -245,7 +245,6 @@ def export_2d(obj_name, fn, verts, edges = None, faces = None, lines = None, met
         l = ' '.join(map(str, line))
         f.write('l {:s}\n'.format(l))
 
-
     print('done.')
 
 

@@ -6,6 +6,8 @@ from __future__ import print_function
 from numpy.random import normal
 from numpy.random import random
 from numpy.linalg import norm
+from numpy import logical_not
+from numpy import logical_and
 from numpy import array
 from numpy import pi as PI
 from numpy import cos
@@ -27,7 +29,6 @@ def random_points_in_circle(n,xx,yy,rr):
   """
 
   from numpy import zeros
-  from numpy import logical_not
   from numpy import column_stack
   from numpy import reshape
 
@@ -42,6 +43,14 @@ def random_points_in_circle(n,xx,yy,rr):
   xyp = reshape(rr*r,(n,1))*column_stack( (cos(t),sin(t)) )
   dartsxy  = xyp + array([xx,yy])
   return dartsxy
+
+def random_points_in_rectangle(n, xx, yy, w, h):
+
+  rnd = random((n,2))
+  height_mask = logical_and(rnd[:,1]>yy-h*0.5, rnd[:,1]<yy+h*0.5)
+  width_mask = logical_and(rnd[:,0]>xx-w*0.5, rnd[:,0]<xx+w*0.5)
+  mask = logical_and(height_mask, width_mask)
+  return rnd[mask,:]
 
 def darts(n, xx, yy, rr, dst):
   """
@@ -68,3 +77,25 @@ def darts(n, xx, yy, rr, dst):
 
   res = dartsxy[jj,:]
   return res
+
+def darts_rect(n, xx, yy, w=1, h=1, dst=0):
+
+  from scipy.spatial import cKDTree as kdt
+
+  ## remove new nodes that are too close to other
+  ## new nodes
+
+  visited = set()
+  dartsxy = random_points_in_rectangle(n, xx, yy, w, h)
+  tree = kdt(dartsxy)
+  near = tree.query_ball_point(dartsxy, dst)
+  jj = []
+  for j,n in enumerate(near):
+
+    if len(visited.intersection(n))<1:
+      jj.append(j)
+      visited.add(j)
+
+  res = dartsxy[jj,:]
+  return res
+
