@@ -3,9 +3,13 @@
 from __future__ import division
 from __future__ import print_function
 
-from numpy.random import normal
 from numpy.random import random
 from numpy.linalg import norm
+from scipy.spatial import cKDTree as kdt
+from numpy import column_stack
+from numpy import row_stack
+from numpy import zeros
+from numpy import reshape
 from numpy import logical_not
 from numpy import logical_and
 from numpy import array
@@ -15,8 +19,7 @@ from numpy import sin
 
 
 def random_unit_vec(num, scale):
-
-  from numpy import reshape
+  from numpy.random import normal
 
   rnd = normal(size=(num,3))
   d = norm(rnd,axis=1)
@@ -28,9 +31,6 @@ def random_points_in_circle(n,xx,yy,rr):
   get n random points in a circle.
   """
 
-  from numpy import zeros
-  from numpy import column_stack
-  from numpy import reshape
 
   rnd = random(size=(n,3))
   t = 2.*PI*rnd[:,0]
@@ -59,8 +59,6 @@ def darts(n, xx, yy, rr, dst):
   than dst.
   """
 
-  from scipy.spatial import cKDTree as kdt
-
   ## remove new nodes that are too close to other
   ## new nodes
 
@@ -80,7 +78,6 @@ def darts(n, xx, yy, rr, dst):
 
 def darts_rect(n, xx, yy, w=1, h=1, dst=0):
 
-  from scipy.spatial import cKDTree as kdt
 
   ## remove new nodes that are too close to other
   ## new nodes
@@ -98,4 +95,32 @@ def darts_rect(n, xx, yy, w=1, h=1, dst=0):
 
   res = dartsxy[jj,:]
   return res
+
+def naive_lloyd(domain=None, sites=None, nd=None, n=None, eps=1.e-3, max_itt=100000):
+
+  from collections import defaultdict
+
+
+  if nd is not None:
+    domain = random(size=(nd,2))
+
+  if n is not None:
+    domain = random(size=(n,2))
+
+  for i in xrange(max_itt):
+
+    dst, tesselation = kdt(sites).query(domain, k=1)
+
+    agg = defaultdict(list)
+    for t,xy in zip(tesselation, domain):
+      agg[t].append(xy)
+
+    centroids = { k:row_stack(v).mean(axis=0) for k,v in agg.iteritems() }
+
+    # for k,v in centroids.iteritems():
+      # sites[k, :] = v
+
+    sites = row_stack(centroids.values())
+
+    yield sites
 
