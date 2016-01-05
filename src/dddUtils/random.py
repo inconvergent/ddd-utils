@@ -117,9 +117,6 @@ def naive_lloyd(domain=None, sites=None, nd=None, n=None, eps=1.e-3, max_itt=100
 
     centroids = { k:row_stack(v).mean(axis=0) for k,v in agg.iteritems() }
 
-    # for k,v in centroids.iteritems():
-      # sites[k, :] = v
-
     sites = row_stack(centroids.values())
 
     yield sites

@@ -4,13 +4,12 @@
 
 from __future__ import print_function
 
-# import matplotlib.pyplot as plt
 from dddUtils.random import naive_lloyd
 from render.render import Animate
 
 BACK = [1,1,1,1]
-FRONT = [0,0,0,5]
-SIZE = 1000
+FRONT = [0,0.5,0.5,0.7]
+SIZE = 520
 ONE = 1.0/SIZE
 
 ALPHA = 0.5
@@ -47,16 +46,22 @@ def main():
   from numpy.random import random
   from numpy import array
 
-  domain = circ(grid(100))
-  sites = random(size=(1000,2))
+  domain = circ(grid(200))
+  sites = random(size=(2000,2))
 
   nl = naive_lloyd(domain, sites, max_itt=MAXITT)
 
   def wrap(render):
 
     sites = nl.next()
+    render.set_front(FRONT)
+    render.clear_canvas()
     for i, s in enumerate(sites):
-      render.circle(*s, r=ONE)
+      render.circle(*s, r=2*ONE, fill=True)
+
+    fn = './asdf_{:05d}.png'
+    render.write_to_png(fn.format(render.num_img))
+    print(fn)
 
     return True
 
