@@ -1,4 +1,5 @@
-#!/usr/bin/python3
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 try:
   from setuptools import setup
@@ -7,12 +8,12 @@ except Exception:
 
 setup(
   name = 'dddUtils',
-  version = '0.0.1',
+  version = '0.0.3',
   license = 'MIT',
   author = '@inconvergent',
   packages = ['dddUtils'],
+  install_requires = ['numpy>=1.8.2'],
   zip_safe = True,
-  package_dir={'dddUtils': 'src/dddUtils'}
-  #install_requires = []
+  # package_dir = {'dddUtils': 'src/dddUtils'}
 )
 

@@ -96,28 +96,5 @@ def darts_rect(n, xx, yy, w=1, h=1, dst=0):
   res = dartsxy[jj,:]
   return res
 
-def naive_lloyd(domain=None, sites=None, nd=None, n=None, eps=1.e-3, max_itt=100000):
 
-  from collections import defaultdict
-
-
-  if nd is not None:
-    domain = random(size=(nd,2))
-
-  if n is not None:
-    domain = random(size=(n,2))
-
-  for i in xrange(max_itt):
-
-    dst, tesselation = kdt(sites).query(domain, k=1)
-
-    agg = defaultdict(list)
-    for t,xy in zip(tesselation, domain):
-      agg[t].append(xy)
-
-    centroids = { k:row_stack(v).mean(axis=0) for k,v in agg.iteritems() }
-
-    sites = row_stack(centroids.values())
-
-    yield sites
 
