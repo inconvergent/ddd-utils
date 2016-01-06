@@ -49,7 +49,7 @@ def __get_inv_tesselation(tesselation):
 
   return inv
 
-def __randint(m, n):
+def __capacity_randint(m, n):
 
   tesselation = zeros(m, 'int')
   tesselation_count = {k:0 for k in xrange(n)}
@@ -84,9 +84,10 @@ def point_cloud(
   print('point cloud')
   print('points (m): {:d}, sites (n): {:d}, cap: {:f}'.format(m,n,cap))
 
-  # tesselation = randint(n, size=m) #  x → s
-  tesselation = __randint(m,n)
+  tesselation = __capacity_randint(m,n) #  x → s
   inv_tesselation = __get_inv_tesselation(tesselation) # s → x
+
+  print(tesselation)
 
   i = 0
   while True:
@@ -111,9 +112,6 @@ def point_cloud(
       isjdst = norm(domain[isj,:]-sjxy, axis=1) - norm(domain[isj,:]-sixy, axis=1)
       Hi = {x:d for x,d in zip(isi, isidst)}
       Hj = {x:d for x,d in zip(isj, isjdst)}
-
-      # Hi = {x: norm(domain[x,:]-sixy)-norm(domain[x,:]-sjxy) for x in isi}
-      # Hj = {x: norm(domain[x,:]-sjxy)-norm(domain[x,:]-sixy) for x in isj}
 
       while Hi and Hj:
 

@@ -17,6 +17,29 @@ ONE = 1.0/SIZE
 RAD = 0.45
 
 
+def get_img_grid(fn):
+
+  from scipy.ndimage import imread
+  from numpy import row_stack
+  from numpy.random import random
+
+  domain = []
+
+  dens = 1.0-imread(fn)/255.
+  m,n = dens.shape
+
+  rnd = random(size=m*n)
+
+  k = 0
+  for i in xrange(m):
+    for j in xrange(n):
+      if rnd[k]<dens[i,j]:
+        domain.append([i/m,j/n])
+      k += 1
+
+  return row_stack(domain)
+
+
 
 def main():
 
@@ -27,13 +50,18 @@ def main():
   from dddUtils.pointCloud import grid
   from dddUtils.pointCloud import circ
 
+  fn = './mountain.png'
 
-  n = 400
+  n = 4096
   m = 12000
 
-  domain = circ(grid(m), rad=RAD)
+
+
+  # domain = circ(grid(m), rad=RAD)
+  domain = get_img_grid(fn)
+
   org_sites = (0.5-RAD) + (1.0-(0.5-RAD)*2)*random(size=(n,2))
-  org_sites = circ(org_sites, rad=RAD)
+  # org_sites = circ(org_sites, rad=RAD)
 
   sites, inv_tesselation = point_cloud(domain, org_sites)
 
@@ -41,24 +69,24 @@ def main():
     render.clear_canvas()
 
     # grid
-    render.set_front(LIGHT)
-    for i, s in enumerate(domain):
-      render.circle(*s, r=ONE, fill=True)
+    # render.set_front(LIGHT)
+    # for i, s in enumerate(domain):
+      # render.circle(*s, r=ONE, fill=True)
 
     render.set_front(BLACK)
     for s, sxy in sites.iteritems():
       render.circle(*sxy, r=3*ONE, fill=False)
 
-    for s,xx in inv_tesselation.iteritems():
+    # for s,xx in inv_tesselation.iteritems():
 
-      sx, sy = sites[s]
+      # sx, sy = sites[s]
 
-      render.set_front(FRONT)
-      for x in xx:
-        render.line(sx, sy, domain[x,0], domain[x,1])
+      # render.set_front(FRONT)
+      # for x in xx:
+        # render.line(sx, sy, domain[x,0], domain[x,1])
 
-      render.set_front(BLACK)
-      render.line(sx, sy, *org_sites[s,:])
+      # render.set_front(BLACK)
+      # render.line(sx, sy, *org_sites[s,:])
 
     # render.set_front(BLACK)
     # for i, s in enumerate(org_sites):
