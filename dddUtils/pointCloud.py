@@ -13,6 +13,7 @@ from operator import itemgetter
 from numpy.random import randint
 from numpy.linalg import norm
 
+from scipy.spatial.distance import cdist
 from numpy import mean
 from numpy import ceil
 from numpy import sqrt
@@ -69,6 +70,7 @@ def __capacity_randint(m, n):
 
   return tesselation
 
+
 def point_cloud(
   domain,
   sites,
@@ -87,65 +89,70 @@ def point_cloud(
   tesselation = __capacity_randint(m,n) #  x → s
   inv_tesselation = __get_inv_tesselation(tesselation) # s → x
 
-  print(tesselation)
+  def __get_h(dd, isi, si, sj):
+    #TODO: heap. this is too slow.
+    w = dd[isi,si] - dd[isi,sj]
+    return {x:d for x,d in zip(isi, w)}
 
-  i = 0
-  while True:
-
-    i += 1
-
-    print('itt: ', i)
-
-    stable = True
-
-    for si,sj in product(xrange(n), repeat=2):
-
-      # do dst calcs elsewhere?
-      # Hi should be heap or otherwise sorted, to easily retieve max
-
-      sixy = sites[si,:]
-      sjxy = sites[sj,:]
-      isi = list(inv_tesselation[si])
-      isj = list(inv_tesselation[sj])
-
-      isidst = norm(domain[isi,:]-sixy, axis=1) - norm(domain[isi,:]-sjxy, axis=1)
-      isjdst = norm(domain[isj,:]-sjxy, axis=1) - norm(domain[isj,:]-sixy, axis=1)
-      Hi = {x:d for x,d in zip(isi, isidst)}
-      Hj = {x:d for x,d in zip(isj, isjdst)}
-
-      while Hi and Hj:
-
-        # if Hi is heap this will be better
-        xi, himax = max(Hi.iteritems(), key=itg)
-        xj, hjmax = max(Hj.iteritems(), key=itg)
-
-        eps = himax+hjmax
-
-        if eps<=0:
-          break
-
-        stable = False
-
-        tesselation[xi] = sj
-        tesselation[xj] = si
-
-        inv_tesselation[si].remove(xi)
-        inv_tesselation[si].add(xj)
-
-        inv_tesselation[sj].remove(xj)
-        inv_tesselation[sj].add(xi)
-
-        del(Hi[xi])
-        del(Hj[xj])
+  def __remap(xi,xj,si,sj):
+    tesselation[xi] = sj
+    tesselation[xj] = si
+    inv_tesselation[si].remove(xi)
+    inv_tesselation[si].add(xj)
+    inv_tesselation[sj].remove(xj)
+    inv_tesselation[sj].add(xi)
+    return
 
 
-    if stable:
-      break
+  # TODO: stop criterion
+  for k in xrange(2):
 
-  agg = [[] for i in repeat(None, n)]
-  for t,xy in zip(tesselation, domain):
-    agg[t].append(xy)
+    dd = cdist(domain, sites, 'euclidean')
 
-  sites = {k:mean(v, axis=0) for k,v in enumerate(agg) if v}
+    i = 0
+    while True:
+
+      i += 1
+
+      print('itt: ', k, i)
+
+      stable = True
+
+      for si,sj in product(xrange(n), repeat=2):
+
+        isj = list(inv_tesselation[sj])
+        isi = list(inv_tesselation[si])
+
+        Hi = __get_h(dd, isi, si, sj)
+        Hj = __get_h(dd, isj, sj, si)
+
+        while Hi and Hj:
+
+          # if Hi is heap this will be better
+          xi, himax = max(Hi.iteritems(), key=itg)
+          xj, hjmax = max(Hj.iteritems(), key=itg)
+
+          eps = himax+hjmax
+
+          if eps<=0:
+            break
+
+          __remap(xi,xj,si,sj)
+          del(Hi[xi])
+          del(Hj[xj])
+
+          stable = False
+
+      if stable:
+        break
+
+    agg = [[] for i in repeat(None, n)]
+    for t,xy in zip(tesselation, domain):
+      agg[t].append(xy)
+
+    for k, v in enumerate(agg):
+      if v:
+        sites[k,:] = mean(v, axis=0)
 
   return sites, {k:v for k, v in inv_tesselation.iteritems() if v}
+

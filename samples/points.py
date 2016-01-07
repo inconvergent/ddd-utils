@@ -52,13 +52,12 @@ def main():
 
   fn = './mountain.png'
 
-  n = 4096
-  m = 12000
+  n = 400
+  m = 10000
 
 
-
-  # domain = circ(grid(m), rad=RAD)
-  domain = get_img_grid(fn)
+  domain = circ(grid(m), rad=RAD)
+  # domain = get_img_grid(fn)
 
   org_sites = (0.5-RAD) + (1.0-(0.5-RAD)*2)*random(size=(n,2))
   # org_sites = circ(org_sites, rad=RAD)
@@ -69,28 +68,28 @@ def main():
     render.clear_canvas()
 
     # grid
-    # render.set_front(LIGHT)
-    # for i, s in enumerate(domain):
-      # render.circle(*s, r=ONE, fill=True)
+    render.set_front(LIGHT)
+    for i, s in enumerate(domain):
+      render.circle(*s, r=ONE, fill=True)
 
     render.set_front(BLACK)
-    for s, sxy in sites.iteritems():
-      render.circle(*sxy, r=3*ONE, fill=False)
+    for s, sxy in enumerate(sites):
+      render.circle(*sxy, r=ONE, fill=True)
 
-    # for s,xx in inv_tesselation.iteritems():
+    for s,xx in inv_tesselation.iteritems():
 
-      # sx, sy = sites[s]
+      sx, sy = sites[s]
 
-      # render.set_front(FRONT)
-      # for x in xx:
-        # render.line(sx, sy, domain[x,0], domain[x,1])
+      render.set_front(FRONT)
+      for x in xx:
+        render.line(sx, sy, domain[x,0], domain[x,1])
 
-      # render.set_front(BLACK)
-      # render.line(sx, sy, *org_sites[s,:])
+      render.set_front(BLACK)
+      render.line(sx, sy, *org_sites[s,:])
 
-    # render.set_front(BLACK)
-    # for i, s in enumerate(org_sites):
-      # render.circle(*s, r=3*ONE, fill=True)
+    render.set_front(BLACK)
+    for i, s in enumerate(org_sites):
+      render.circle(*s, r=3*ONE, fill=True)
 
   def wrap(render):
     show(render)
