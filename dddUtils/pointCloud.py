@@ -92,7 +92,7 @@ def point_cloud(
   def __get_h(dd, isi, si, sj):
     #TODO: heap. this is too slow.
     w = dd[isi,si] - dd[isi,sj]
-    return {x:d for x,d in zip(isi, w)}
+    return dict(zip(isi, w))
 
   def __remap(xi,xj,si,sj):
     tesselation[xi] = sj
@@ -105,11 +105,11 @@ def point_cloud(
 
 
   # TODO: stop criterion
-  for k in xrange(2):
+  for k in xrange(3):
 
     dd = cdist(domain, sites, 'euclidean')
 
-    i = 0
+    i = -1
     while True:
 
       i += 1
@@ -120,11 +120,8 @@ def point_cloud(
 
       for si,sj in product(xrange(n), repeat=2):
 
-        isj = list(inv_tesselation[sj])
-        isi = list(inv_tesselation[si])
-
-        Hi = __get_h(dd, isi, si, sj)
-        Hj = __get_h(dd, isj, sj, si)
+        Hi = __get_h(dd, list(inv_tesselation[si]), si, sj)
+        Hj = __get_h(dd, list(inv_tesselation[sj]), sj, si)
 
         while Hi and Hj:
 

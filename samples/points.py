@@ -52,8 +52,8 @@ def main():
 
   fn = './mountain.png'
 
-  n = 400
-  m = 10000
+  n = 500
+  m = 15000
 
 
   domain = circ(grid(m), rad=RAD)
