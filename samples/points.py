@@ -52,7 +52,7 @@ def main():
 
   fn = './mountain.png'
 
-  n = 500
+  n = 100
   m = 15000
 
 

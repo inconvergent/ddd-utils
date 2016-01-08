@@ -73,15 +73,19 @@ def __capacity_randint(m, n):
 
 def point_cloud(
   domain,
-  sites,
-  eps=1.e-3
+  org_sites,
+  tol=1.e-2,
+  maxitt=10000
 ):
 
   itg = itemgetter(1)
 
   m = len(domain)
-  n = len(sites)
+  n = len(org_sites)
   cap = m/n
+
+  sites = zeros((n,2),'float')
+  sites[:] = org_sites[:]
 
   print('point cloud')
   print('points (m): {:d}, sites (n): {:d}, cap: {:f}'.format(m,n,cap))
@@ -103,12 +107,11 @@ def point_cloud(
     inv_tesselation[sj].add(xi)
     return
 
-
-  # TODO: stop criterion
-  for k in xrange(3):
+  for k in xrange(maxitt):
 
     dd = cdist(domain, sites, 'euclidean')
 
+    max_eps = -1
     i = -1
     while True:
 
@@ -128,8 +131,9 @@ def point_cloud(
           # if Hi is heap this will be better
           xi, himax = max(Hi.iteritems(), key=itg)
           xj, hjmax = max(Hj.iteritems(), key=itg)
-
           eps = himax+hjmax
+
+          max_eps = max(eps, max_eps)
 
           if eps<=0:
             break
@@ -150,6 +154,12 @@ def point_cloud(
     for k, v in enumerate(agg):
       if v:
         sites[k,:] = mean(v, axis=0)
+
+    if abs(max_eps)<tol:
+      print('terminating, reached tol: {:0.5f} ({:0.5f})'.format(max_eps, tol))
+      break
+    else:
+      print('eps {:0.5f}, going again ...'.format(max_eps))
 
   return sites, {k:v for k, v in inv_tesselation.iteritems() if v}
 
