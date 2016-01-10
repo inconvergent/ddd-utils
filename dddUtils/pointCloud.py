@@ -16,37 +16,31 @@ from numpy.linalg import norm
 from scipy.spatial.distance import cdist
 from numpy import mean
 from numpy import ceil
-from numpy import sqrt
+from numpy import square
 from numpy import linspace
 from numpy import meshgrid
 from numpy import column_stack
-from numpy import concatenate
-from numpy import array
+from numpy import row_stack
 from numpy import zeros
+from numpy import array
+from numpy import reshape
 
-def grid(m):
 
-  m = int(ceil(sqrt(m)))
+def grid(m, n):
 
-  print('making {:d} × {:d} grid, {:d} elements'.format(m,m,m*m))
+  print('making {:d} × {:d} grid, {:d} elements'.format(m,n,m*n))
 
   x = linspace(0, 1, m)
-  y = linspace(0, 1, m)
-  xv, yv = meshgrid(x, y)
-
-  return column_stack((concatenate(xv), concatenate(yv)))
-
-def circ(domain, rad=0.5):
-
-  r = norm(array([[0.5,0.5]]) - domain, axis=1)
-
-  return domain[r<rad,:]
+  y = linspace(0, 1, n)
+  return meshgrid(x, y)
 
 def __get_inv_tesselation(tesselation):
 
   inv = defaultdict(set)
   for i,t in enumerate(tesselation):
     inv[t].add(i)
+
+  # print([len(i) for i in inv.values()])
 
   return inv
 
@@ -61,7 +55,7 @@ def __capacity_randint(m, n):
     while True:
 
       r = randint(n)
-      if tesselation_count[r]>cap:
+      if tesselation_count[r]>=cap:
         continue
       else:
         tesselation[i] = r
@@ -72,7 +66,7 @@ def __capacity_randint(m, n):
 
 
 def point_cloud(
-  domain,
+  flat,
   org_sites,
   tol=1.e-2,
   maxitt=10000
@@ -80,7 +74,7 @@ def point_cloud(
 
   itg = itemgetter(1)
 
-  m = len(domain)
+  m = len(flat)
   n = len(org_sites)
   cap = m/n
 
@@ -90,26 +84,26 @@ def point_cloud(
   print('point cloud')
   print('points (m): {:d}, sites (n): {:d}, cap: {:f}'.format(m,n,cap))
 
-  tesselation = __capacity_randint(m,n) #  x → s
-  inv_tesselation = __get_inv_tesselation(tesselation) # s → x
 
   def __get_h(dd, isi, si, sj):
     #TODO: heap. this is too slow.
     w = dd[isi,si] - dd[isi,sj]
     return dict(zip(isi, w))
 
-  def __remap(xi,xj,si,sj):
-    tesselation[xi] = sj
-    tesselation[xj] = si
-    inv_tesselation[si].remove(xi)
-    inv_tesselation[si].add(xj)
-    inv_tesselation[sj].remove(xj)
-    inv_tesselation[sj].add(xi)
+  def __remap(tes, inv, xi,xj,si,sj):
+    tes[xi] = sj
+    tes[xj] = si
+    inv[si].remove(xi)
+    inv[si].add(xj)
+    inv[sj].remove(xj)
+    inv[sj].add(xi)
     return
 
   for k in xrange(maxitt):
 
-    dd = cdist(domain, sites, 'euclidean')
+    dd = cdist(flat[:,:2], sites, 'euclidean')
+    tesselation = __capacity_randint(m,n) #  x → s
+    inv_tesselation = __get_inv_tesselation(tesselation) # s → x
 
     max_eps = -1
     i = -1
@@ -138,7 +132,7 @@ def point_cloud(
           if eps<=0:
             break
 
-          __remap(xi,xj,si,sj)
+          __remap(tesselation, inv_tesselation, xi,xj,si,sj)
           del(Hi[xi])
           del(Hj[xj])
 
@@ -148,18 +142,32 @@ def point_cloud(
         break
 
     agg = [[] for i in repeat(None, n)]
-    for t,xy in zip(tesselation, domain):
-      agg[t].append(xy)
+    for t,xyp in zip(tesselation, flat):
+      agg[t].append(xyp)
 
     for k, v in enumerate(agg):
       if v:
-        sites[k,:] = mean(v, axis=0)
+        v = row_stack(v)
+
+        tot = v[:,2].sum()
+        sa = (v[:,:2]*v[:,2:]).sum(axis=0)/tot
+
+
+        sb = mean(v[:,:2], axis=0)
+        sites[k,:] = sb
+
+        print(sa,sb,norm(sa-sb))
+
+    cap_count = array([len(v) for v in inv_tesselation.values()],'float')
+    cap_err = square(cap_count/float(cap)-1.0).sum()/n
 
     if abs(max_eps)<tol:
-      print('terminating, reached tol: {:0.5f} ({:0.5f})'.format(max_eps, tol))
+      pr('terminating, reached tol: {:0.5f} ({:0.5f})'.format(max_eps, tol))
+      print('capacity error: {:0.5f}'.format(cap_err))
       break
     else:
       print('eps {:0.5f}, going again ...'.format(max_eps))
+      print('capacity error: {:0.5f}'.format(cap_err))
 
   return sites, {k:v for k, v in inv_tesselation.iteritems() if v}
 

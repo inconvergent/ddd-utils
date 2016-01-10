@@ -39,6 +39,31 @@ def get_img_grid(fn):
 
   return row_stack(domain)
 
+def get_sites(domain_dens, n):
+
+  from numpy import floor
+  from numpy import row_stack
+  from numpy import zeros
+  from numpy.random import random
+
+  m = domain_dens.shape[0]
+
+  sites = zeros((n,2),'float')
+  k = 0
+
+  while k<n:
+
+    xy = random(2)
+    ij = floor(xy*m)
+    d = domain_dens[ij[0],ij[1],2]
+    # print(d)
+    if random()<d:
+      # print(xy, ij)
+      sites[k,:] = xy
+      k += 1
+
+  return row_stack(sites)
+
 
 
 def main():
@@ -46,35 +71,44 @@ def main():
   import gtk
   from render.render import Animate
   from numpy.random import random
-  from dddUtils.pointCloud import point_cloud
+  from numpy import zeros
   from dddUtils.pointCloud import grid
-  from dddUtils.pointCloud import circ
+  from dddUtils.pointCloud import point_cloud
+  from numpy import reshape
 
   fn = './mountain.png'
 
-  n = 100
-  m = 15000
+  n = 200
+  mx = 200
+  m = mx*mx
 
 
-  domain = circ(grid(m), rad=RAD)
-  # domain = get_img_grid(fn)
+  domain_dens = zeros((mx,mx,3), 'float')
+  xv,yv = grid(mx,mx)
+  domain_dens[:,:,0] = xv
+  domain_dens[:,:,1] = yv
+  domain_dens[:,:,2] = xv*yv
 
-  org_sites = (0.5-RAD) + (1.0-(0.5-RAD)*2)*random(size=(n,2))
+  flat = reshape(domain_dens, (m,3))
+  print(flat)
+
+
+  # org_sites = (0.5-RAD) + (1.0-(0.5-RAD)*2)*random(size=(n,2))
+  org_sites = get_sites(domain_dens, n)
   # org_sites = circ(org_sites, rad=RAD)
 
-  sites, inv_tesselation = point_cloud(domain, org_sites)
+  sites, inv_tesselation = point_cloud(flat, org_sites, maxitt=4)
 
   def show(render):
     render.clear_canvas()
 
-    # grid
     render.set_front(LIGHT)
-    for i, s in enumerate(domain):
+    for i, s in enumerate(flat[:,:2]):
       render.circle(*s, r=ONE, fill=True)
 
     render.set_front(BLACK)
     for s, sxy in enumerate(sites):
-      render.circle(*sxy, r=ONE, fill=True)
+      render.circle(*sxy, r=3*ONE, fill=True)
 
     for s,xx in inv_tesselation.iteritems():
 
@@ -82,14 +116,14 @@ def main():
 
       render.set_front(FRONT)
       for x in xx:
-        render.line(sx, sy, domain[x,0], domain[x,1])
+        render.line(sx, sy, flat[x,0], flat[x,1])
 
-      render.set_front(BLACK)
-      render.line(sx, sy, *org_sites[s,:])
+      # render.set_front(BLACK)
+      # render.line(sx, sy, *org_sites[s,:])
 
     render.set_front(BLACK)
     for i, s in enumerate(org_sites):
-      render.circle(*s, r=3*ONE, fill=True)
+      render.circle(*s, r=3*ONE, fill=False)
 
   def wrap(render):
     show(render)
@@ -111,7 +145,7 @@ def main():
 
 if __name__ == '__main__':
 
-  if True:
+  if False:
     import pstats
     import cProfile
     OUT = 'profile'
