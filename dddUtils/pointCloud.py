@@ -83,10 +83,10 @@ def point_cloud(
   print('points (m): {:d}, sites (n): {:d}, cap: {:f}'.format(m,n,cap))
 
 
-  def __get_h(dd, isi, si, sj):
+  def __get_h(dd, xii, si, sj):
     #TODO: heap. this is too slow.
-    w = dd[isi,si] - dd[isi,sj]
-    res = sorted(zip(isi, w), key=itg)
+    w = dd[xii,si] - dd[xii,sj]
+    res = sorted(zip(xii, w), key=itg)
     return  res
 
   def __remap(tes, inv, xi,xj,si,sj):
@@ -135,7 +135,7 @@ def point_cloud(
           if eps<=0:
             break
 
-          __remap(tesselation, inv_tesselation, xi,xj,si,sj)
+          __remap(tesselation,inv_tesselation,xi,xj,si,sj)
           # del(Hi[xi])
           # del(Hj[xj])
 
@@ -149,7 +149,8 @@ def point_cloud(
       agg[t].append(xy)
 
     for k, v in enumerate(agg):
-      sites[k,:] = mean(v, axis=0)
+      if v:
+        sites[k,:] = mean(v, axis=0)
 
     cap_count = array([len(v) for v in inv_tesselation.values()],'float')
     cap_err = square(cap_count/float(cap)-1.0).sum()/n

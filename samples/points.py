@@ -62,14 +62,15 @@ def main():
   from numpy.random import random
   from numpy import zeros
   from dddUtils.pointCloud import point_cloud
+  from dddUtils.ioOBJ import export_2d as export
   from numpy import reshape
 
-  fn = './mountain.png'
+  fn = './mountain2.png'
   n = 300
-  m = 10000
+  m = 1000
 
-  # dens = get_dens_from_img(fn)
-  dens = get_dens_example(100)
+  dens = get_dens_from_img(fn)
+  # dens = get_dens_example(100)
 
   domain = sample_from_dens(dens, m)
   org_sites = sample_from_dens(dens, n)
@@ -114,6 +115,8 @@ def main():
     gtk.main_quit(*args)
     show(render)
     render.write_to_png('./exit.png')
+
+    export('voronoi','exit.2obj', sites)
   render.window.connect("destroy", __write_svg_and_exit)
 
   gtk.main()
