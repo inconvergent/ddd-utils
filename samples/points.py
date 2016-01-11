@@ -17,52 +17,41 @@ ONE = 1.0/SIZE
 RAD = 0.45
 
 
-def get_img_grid(fn):
+def get_dens_from_img(fn):
 
   from scipy.ndimage import imread
-  from numpy import row_stack
-  from numpy.random import random
 
-  domain = []
+  return 1.0-imread(fn)/255.
 
-  dens = 1.0-imread(fn)/255.
-  m,n = dens.shape
+def get_dens_example(n):
 
-  rnd = random(size=m*n)
+  from dddUtils.pointCloud import grid
 
-  k = 0
-  for i in xrange(m):
-    for j in xrange(n):
-      if rnd[k]<dens[i,j]:
-        domain.append([i/m,j/n])
-      k += 1
+  x,y = grid(n,n)
 
-  return row_stack(domain)
+  return x*y
 
-def get_sites(domain_dens, n):
+
+def sample_from_dens(dens, n):
 
   from numpy import floor
-  from numpy import row_stack
   from numpy import zeros
   from numpy.random import random
 
-  m = domain_dens.shape[0]
-
-  sites = zeros((n,2),'float')
+  m = dens.shape[0]
+  res = zeros((n,2),'float')
   k = 0
 
   while k<n:
 
     xy = random(2)
     ij = floor(xy*m)
-    d = domain_dens[ij[0],ij[1],2]
-    # print(d)
+    d = dens[ij[0],ij[1]]
     if random()<d:
-      # print(xy, ij)
-      sites[k,:] = xy
+      res[k,:] = xy
       k += 1
 
-  return row_stack(sites)
+  return res
 
 
 
@@ -72,58 +61,46 @@ def main():
   from render.render import Animate
   from numpy.random import random
   from numpy import zeros
-  from dddUtils.pointCloud import grid
   from dddUtils.pointCloud import point_cloud
   from numpy import reshape
 
   fn = './mountain.png'
+  n = 300
+  m = 10000
 
-  n = 200
-  mx = 200
-  m = mx*mx
+  # dens = get_dens_from_img(fn)
+  dens = get_dens_example(100)
 
+  domain = sample_from_dens(dens, m)
+  org_sites = sample_from_dens(dens, n)
 
-  domain_dens = zeros((mx,mx,3), 'float')
-  xv,yv = grid(mx,mx)
-  domain_dens[:,:,0] = xv
-  domain_dens[:,:,1] = yv
-  domain_dens[:,:,2] = xv*yv
-
-  flat = reshape(domain_dens, (m,3))
-  print(flat)
-
-
-  # org_sites = (0.5-RAD) + (1.0-(0.5-RAD)*2)*random(size=(n,2))
-  org_sites = get_sites(domain_dens, n)
-  # org_sites = circ(org_sites, rad=RAD)
-
-  sites, inv_tesselation = point_cloud(flat, org_sites, maxitt=4)
+  sites, inv_tesselation = point_cloud(domain, org_sites, maxitt=4)
 
   def show(render):
     render.clear_canvas()
 
     render.set_front(LIGHT)
-    for i, s in enumerate(flat[:,:2]):
+    for i, s in enumerate(domain):
       render.circle(*s, r=ONE, fill=True)
 
     render.set_front(BLACK)
     for s, sxy in enumerate(sites):
       render.circle(*sxy, r=3*ONE, fill=True)
 
-    for s,xx in inv_tesselation.iteritems():
+    # for s,xx in inv_tesselation.iteritems():
 
-      sx, sy = sites[s]
+      # sx, sy = sites[s]
 
-      render.set_front(FRONT)
-      for x in xx:
-        render.line(sx, sy, flat[x,0], flat[x,1])
+      # render.set_front(FRONT)
+      # for x in xx:
+        # render.line(sx, sy, domain[x,0], domain[x,1])
 
       # render.set_front(BLACK)
       # render.line(sx, sy, *org_sites[s,:])
 
-    render.set_front(BLACK)
-    for i, s in enumerate(org_sites):
-      render.circle(*s, r=3*ONE, fill=False)
+    # render.set_front(BLACK)
+    # for i, s in enumerate(org_sites):
+      # render.circle(*s, r=3*ONE, fill=False)
 
   def wrap(render):
     show(render)
@@ -145,7 +122,7 @@ def main():
 
 if __name__ == '__main__':
 
-  if False:
+  if True:
     import pstats
     import cProfile
     OUT = 'profile'
