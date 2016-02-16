@@ -121,9 +121,35 @@ def get_distinct_edges_from_tris(faces):
 
   return edges
 
+def spatial_concat_2d(paths, eps=1.e-9):
+
+  from numpy.linalg import norm
+  from numpy import row_stack
+
+  res = []
+  curr = paths[0]
+  concats = 0
+  for p in paths[1:]:
+    if p.shape[0]<2:
+      print('WARNING: path with only one vertex.')
+      continue
+    if norm(p[0,:]-curr[-1,:])<eps:
+      curr = row_stack([curr, p[1:,:]])
+      concats += 1
+    else:
+      res.append(curr)
+      curr = p
+
+  print('concats: ', concats)
+  print('original paths: ', len(paths))
+  print('number after concatination: ', len(res))
+
+  print()
+
+  return res
+
 def spatial_sort_2d(paths, init_rad=0.01):
 
-  from numpy import row_stack
   from numpy import array
   from numpy import zeros
   from numpy.linalg import norm
