@@ -140,6 +140,8 @@ def spatial_concat_2d(paths, eps=1.e-9):
       res.append(curr)
       curr = p
 
+  res.append(curr)
+
   print('concats: ', concats)
   print('original paths: ', len(paths))
   print('number after concatination: ', len(res))
