@@ -213,3 +213,47 @@ def spatial_sort_2d(paths, init_rad=0.01):
 
   return res
 
+def spatial_sort_dots_2d(vertices, init_rad=0.01):
+
+  from numpy import array
+  from numpy import arange
+  from numpy.linalg import norm
+  from scipy.spatial import cKDTree as kdt
+
+  num = len(vertices)
+
+  res = []
+
+  unsorted = set(arange(num).astype('int'))
+
+  tree = kdt(vertices)
+
+  count = 0
+  pos = array([0,0],'float')
+
+  while count<num:
+
+    rad = init_rad
+    while True:
+
+      near = tree.query_ball_point(pos, rad)
+      cands = list(set(near).intersection(unsorted))
+      if not cands:
+        rad *= 2.0
+        continue
+
+      dst = norm(pos - vertices[cands,:], axis=1)
+      cp = dst.argmin()
+      uns = cands[cp]
+      break
+
+    path = vertices[uns]
+
+    res.append(path)
+    pos = vertices[uns, :]
+    unsorted.remove(uns)
+
+    count += 1
+
+  return res
+
