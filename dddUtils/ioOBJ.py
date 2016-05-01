@@ -227,8 +227,6 @@ def export_2d(obj_name, fn, verts, edges = None, faces = None, lines = None, met
     for v in verts:
       f.write('v {:f} {:f}\n'.format(*v))
 
-    f.write('s off\n')
-
     if edges is not None:
       for t in edges:
         t += 1
@@ -246,5 +244,4 @@ def export_2d(obj_name, fn, verts, edges = None, faces = None, lines = None, met
         f.write('l {:s}\n'.format(l))
 
     print('done.')
-
 
